@@ -2,6 +2,8 @@ import * as admin from 'firebase-admin';
 import * as functions from 'firebase-functions';
 import { onRequest } from 'firefuncs';
 
+import { transformDate } from '../../utils';
+
 export class Records {
     @onRequest('/', {
         method: 'get',
@@ -11,8 +13,8 @@ export class Records {
             try {
                 admin.initializeApp(functions.config().firebase);
             } catch (error) {}
-            let db = admin.firestore();
-            let collection = await db.collection('records');
+            const db = admin.firestore();
+            const collection = db.collection('records');
             let query;
             if (req.query.email) {
                 query = collection.where('email', '==', req.query.email);
@@ -30,7 +32,7 @@ export class Records {
             const snapshot = await query.get();
             if (!snapshot.empty) {
                 const docs: any[] = [];
-                snapshot.forEach(doc => docs.push(doc.data()))
+                snapshot.forEach(doc => docs.push(transformDate(doc.data())))
                 res.send({
                     data: docs
                 });
@@ -54,15 +56,16 @@ export class Records {
             try {
                 admin.initializeApp(functions.config().firebase);
             } catch (error) {}
-            let db = admin.firestore();
+            const db = admin.firestore();
             const ref = await db.collection('records').add({
                 ...req.body,
                 createdAt: admin.firestore.Timestamp.fromDate(new Date()),
                 updatedAt: admin.firestore.Timestamp.fromDate(new Date())
             });
             const doc = await ref.get();
-            if (doc.exists) {
-                res.send({ data: doc.data() })
+            const docData = doc.data();
+            if (doc.exists && docData) {
+                res.send({ data: transformDate(docData) })
             } else {
                 throw new Error('Record was not created');
             }
