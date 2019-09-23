@@ -53,10 +53,18 @@ export class Records {
     }, 'europe-west1')
     public async save(req: any, res: any) {
         try {
+            const clientToken = req.headers['x-devsig-client-token'];
+            if (!clientToken) {
+                throw new Error('Unauthorized access');
+            }
             try {
                 admin.initializeApp(functions.config().firebase);
             } catch (error) {}
             const db = admin.firestore();
+            const snapshot = await db.collection('clients').where('token', '==', clientToken).get();
+            if (snapshot.empty) {
+                throw new Error('Unauthorized access');
+            }
             const ref = await db.collection('records').add({
                 ...req.body,
                 createdAt: admin.firestore.Timestamp.fromDate(new Date()),
@@ -71,7 +79,9 @@ export class Records {
             }
         } catch (error) {
             res.send({
-                error
+                error: {
+                    message: error.message
+                }
             })
         }
     }
