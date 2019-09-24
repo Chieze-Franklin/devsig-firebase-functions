@@ -1,19 +1,17 @@
 import * as admin from 'firebase-admin';
-import * as functions from 'firebase-functions';
 import { onRequest } from 'firefuncs';
 
 import { transformDate } from '../../utils';
+import { AuthClientMiddleware, InitMiddleware } from '../../middleware';
 
 export class Records {
     @onRequest('/', {
         method: 'get',
+        middleware: [InitMiddleware]
     }, 'europe-west1')
     public async find(req: any, res: any) {
         try {
-            try {
-                admin.initializeApp(functions.config().firebase);
-            } catch (error) {}
-            const db = admin.firestore();
+            const db: FirebaseFirestore.Firestore = req.firestore.db;
             const collection = db.collection('records');
             let query;
             if (req.query.email) {
@@ -43,28 +41,20 @@ export class Records {
             }
         } catch (error) {
             res.send({
-                error
+                error: {
+                    message: error.message
+                }
             })
         }
     }
 
     @onRequest('/', {
         method: 'post',
+        middleware: [InitMiddleware, AuthClientMiddleware]
     }, 'europe-west1')
     public async save(req: any, res: any) {
         try {
-            const clientToken = req.headers['x-devsig-client-token'];
-            if (!clientToken) {
-                throw new Error('Unauthorized access');
-            }
-            try {
-                admin.initializeApp(functions.config().firebase);
-            } catch (error) {}
-            const db = admin.firestore();
-            const snapshot = await db.collection('clients').where('token', '==', clientToken).get();
-            if (snapshot.empty) {
-                throw new Error('Unauthorized access');
-            }
+            const db: FirebaseFirestore.Firestore = req.firestore.db;
             const ref = await db.collection('records').add({
                 ...req.body,
                 createdAt: admin.firestore.Timestamp.fromDate(new Date()),
