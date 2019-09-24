@@ -81,7 +81,7 @@ export class Records {
         method: 'post',
         middleware: [InitMiddleware, AuthClientMiddleware, ValidateRequestMiddleware]
     }, 'europe-west1')
-    public async saveForPeriod(req: any, res: any) {
+    public async saveInPeriod(req: any, res: any) {
         try {
             const period = req.query && req.query.period ? req.query.period : 'day';
             const date = req.body.date ? new Date(req.body.date) : new Date(Date.now());
