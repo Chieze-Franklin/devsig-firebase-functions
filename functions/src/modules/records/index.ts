@@ -82,25 +82,25 @@ export class Records {
         middleware: [InitMiddleware, AuthClientMiddleware, ValidateRequestMiddleware]
     }, 'europe-west1')
     public async saveInPeriod(req: any, res: any) {
-        try {
+        try {console.log(req.query);console.log(req.body);
             const period = req.query && req.query.period ? req.query.period : 'day';
             const date = req.body.date ? new Date(req.body.date) : new Date(Date.now());
             let startDate = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0, 0);
             let endDate = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 23, 59, 59, 999);
-            if (period == 'year') {
+            if (period === 'year') {
                 startDate = new Date(date.getFullYear(), 0, 1, 0, 0, 0, 0);
                 endDate = new Date(date.getFullYear(), 11, 31, 23, 59, 59, 999);
-            } else if (period == 'month') {
+            } else if (period === 'month') {
                 startDate = new Date(date.getFullYear(), date.getMonth(), 1, 0, 0, 0, 0);
                 endDate =
                 new Date(date.getFullYear(),
                     date.getMonth(),
                     new Date(date.getFullYear(), (date.getMonth() + 1), 0).getDate(),
                     23, 59, 59, 999);
-            } else if (period == 'hour') {
+            } else if (period === 'hour') {
                 startDate = new Date(date.getFullYear(), date.getMonth(), date.getDate(), date.getHours(), 0, 0, 0);
                 endDate = new Date(date.getFullYear(), date.getMonth(), date.getDate(), date.getHours(), 59, 59, 999);
-            } else if (period == 'minute') {
+            } else if (period === 'minute') {
                 startDate = new Date(date.getFullYear(), date.getMonth(), date.getDate(), date.getHours(), date.getMinutes(), 0, 0);
                 endDate = new Date(date.getFullYear(), date.getMonth(), date.getDate(), date.getHours(), date.getMinutes(), 59, 999);
             }
