@@ -8,6 +8,7 @@ export function buildJsonData(doc: DocumentSnapshot) {
             id: doc.id,
             ...docData,
             createTime: doc.createTime ? doc.createTime.toDate() : undefined,
+            date: docData.date ? docData.date.toDate() : undefined,
             updateTime: doc.updateTime ? doc.updateTime.toDate() : undefined
         });
     }

@@ -49,3 +49,22 @@ export class InitMiddleware {
         }
     }
 }
+
+export class ValidateRequestMiddleware {
+    async middleware(req: any, res: any, next: Function) {
+        try {
+            // request must have
+            if (!req.body.email || !req.body.metric || !req.body.value) {
+                throw new Error('Request body is missing email, metric or value');
+            }
+            // request may have
+            next();
+        } catch (error) {
+            res.send({
+                error: {
+                    message: error.message
+                }
+            })
+        }
+    }
+}
