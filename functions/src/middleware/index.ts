@@ -9,10 +9,16 @@ export class AuthClientMiddleware {
                 throw new Error('Unauthorized access');
             }
             const db: FirebaseFirestore.Firestore = req.firestore.db;
-            const snapshot = await db.collection('clients').where('token', '==', clientToken).get();
-            if (snapshot.empty) {
+            const doc = await db.collection('clients').doc(clientToken).get();
+            const docData = doc.data();
+            if (!doc.exists || !docData) {
                 throw new Error('Unauthorized access');
             }
+            if (docData.blocked) {
+                throw new Error('Unauthorized access');
+            }
+            req.firestore = req.firestore || {};
+            req.firestore.clientId = req.firestore.clientId || doc.id;
             next();
         } catch (error) {
             res.send({
@@ -33,6 +39,25 @@ export class InitMiddleware {
             const db = admin.firestore();
             req.firestore = req.firestore || {};
             req.firestore.db = req.firestore.db || db;
+            next();
+        } catch (error) {
+            res.send({
+                error: {
+                    message: error.message
+                }
+            })
+        }
+    }
+}
+
+export class ValidateRequestMiddleware {
+    async middleware(req: any, res: any, next: Function) {
+        try {
+            // request must have
+            if (!req.body.email || !req.body.metric || !req.body.value) {
+                throw new Error('Request body is missing email, metric or value');
+            }
+            // request may have
             next();
         } catch (error) {
             res.send({
