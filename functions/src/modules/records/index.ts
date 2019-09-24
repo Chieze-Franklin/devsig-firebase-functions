@@ -1,7 +1,7 @@
-import * as admin from 'firebase-admin';
+// import * as admin from 'firebase-admin';
 import { onRequest } from 'firefuncs';
 
-import { transformDate } from '../../utils';
+import { buildJsonData } from '../../utils';
 import { AuthClientMiddleware, InitMiddleware } from '../../middleware';
 
 export class Records {
@@ -30,7 +30,7 @@ export class Records {
             const snapshot = await query.get();
             if (!snapshot.empty) {
                 const docs: any[] = [];
-                snapshot.forEach(doc => docs.push(transformDate(doc.data())))
+                snapshot.forEach(doc => docs.push(buildJsonData(doc)))
                 res.send({
                     data: docs
                 });
@@ -57,13 +57,14 @@ export class Records {
             const db: FirebaseFirestore.Firestore = req.firestore.db;
             const ref = await db.collection('records').add({
                 ...req.body,
-                createdAt: admin.firestore.Timestamp.fromDate(new Date()),
-                updatedAt: admin.firestore.Timestamp.fromDate(new Date())
+                clientId: req.firestore.clientId,
+                // createdAt: new Date(Date.now()), // admin.firestore.Timestamp.fromDate(new Date()),
+                date: req.body.date ? new Date(req.body.date) : new Date(Date.now()),
+                // updatedAt: new Date(Date.now()),
             });
             const doc = await ref.get();
-            const docData = doc.data();
-            if (doc.exists && docData) {
-                res.send({ data: transformDate(docData) })
+            if (doc.exists) {
+                res.send({ data: buildJsonData(doc) })
             } else {
                 throw new Error('Record was not created');
             }

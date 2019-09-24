@@ -1,16 +1,15 @@
-import { DocumentData } from "@google-cloud/firestore";
+import { DocumentSnapshot } from "@google-cloud/firestore";
 
-export function transformDate(docData: DocumentData) {
-    let createdAt, updatedAt;
-    if (docData.createdAt) {
-        createdAt = docData.createdAt.toDate();
+export function buildJsonData(doc: DocumentSnapshot) {
+    const docData = doc.data();
+    if (doc.exists && docData) {
+        return ({
+            _id: doc.id,
+            id: doc.id,
+            ...docData,
+            createTime: doc.createTime ? doc.createTime.toDate() : undefined,
+            updateTime: doc.updateTime ? doc.updateTime.toDate() : undefined
+        });
     }
-    if (docData.updatedAt) {
-        updatedAt = docData.updatedAt.toDate();
-    }
-    return ({
-        ...docData,
-        createdAt,
-        updatedAt
-    });
+    return ({});
 }
