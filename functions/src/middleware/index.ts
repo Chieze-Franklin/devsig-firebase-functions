@@ -54,8 +54,10 @@ export class ValidateRequestMiddleware {
     async middleware(req: any, res: any, next: Function) {
         try {
             // request must have
-            if (!req.body.email || !req.body.metric || !req.body.value) {
-                throw new Error('Request body is missing email, metric or value');
+            if (typeof req.body.user === 'undefined'
+            || typeof req.body.metric === 'undefined'
+            || typeof !req.body.value === 'undefined') {
+                throw new Error('Request body is missing user, metric or value');
             }
             // request may have
             next();

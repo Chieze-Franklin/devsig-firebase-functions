@@ -14,8 +14,8 @@ export class Records {
             const db: FirebaseFirestore.Firestore = req.firestore.db;
             const collection = db.collection('records');
             let query;
-            if (req.query.email) {
-                query = collection.where('email', '==', req.query.email);
+            if (req.query.user) {
+                query = collection.where('user', '==', req.query.user);
             }
             if (req.query.metric) {
                 if (!query) {
@@ -107,7 +107,7 @@ export class Records {
 
             const db: FirebaseFirestore.Firestore = req.firestore.db;
             const snapshot = await db.collection('records')
-                .where('email', '==', req.body.email)
+                .where('user', '==', req.body.user)
                 .where('metric', '==', req.body.metric)
                 .where('date', '>=', startDate)
                 .where('date', '<=', endDate)
